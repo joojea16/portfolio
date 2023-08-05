@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CARD</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: #0a3c2f;
+      }
+      #text {
+        position: absolute;
+        left: 50%;
+        top: 15%;
+        display: inline-block;
+        width: 500px;
+        height: 50px;
+        transform: translate(-50%, -50%);
+        color: #fff;
+        font-size: 1.6rem;
+        font-weight: 500;
+        text-align: center;
+      }
+      #wrapper {
+        border: 1px solid #000;
+        width: 500px;
+        height: 630px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #0d614b;
+      }
+      #wrapper h1 {
+        width: 100%;
+        text-align: center;
+        color: #fff;
+        line-height: 60px;
+        font-size: 2.5rem;
+      }
+      .card {
+        display: inline-block;
+        margin: 5px 8px 16px 8px;
+        width: 100px;
+        height: 100px;
+        perspective: 140px;
+        cursor: pointer;
+      }
+      .card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        transition: 0.8s;
+        transform-style: preserve-3d;
+      }
+      .card.flipped .card-inner {
+        transform: rotateY(180deg);
+      }
+      .card-front {
+        background: #209f7b;
+      }
+      .card-front,
+      .card-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 1px solid #000;
+        backface-visibility: hidden;
+      }
+      .card-back {
+        transform: rotateY(180deg);
+        background-color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 2rem;
+      }
+      #reset {
+        position: absolute;
+        left: 50%;
+        bottom: 2%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        color: #267c65;
+        border: none;
+        padding: 15px 25px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      #reset:focus {
+        color: #fff;
+        background: #267c65;
+      }
+    </style>
+  </head>
+  <body>
+    <span id="text"></span>
+    <div id="wrapper"><h1>Memory Game</h1></div>
+    <button id="reset" onclick="resetGame()">Reset Game</button>
+
+    <script>
+      const $wrapper = document.querySelector("#wrapper");
+      const $text = document.querySelector("#text");
+      const total = 16;
+      const colors = ["🐵", "🐶", "🐸", "🐗", "🐯", "🦒", "🐷", "🦝"];
+      let colorCopy = colors.concat(colors);
+      let shuffled = [];
+      let clicked = [];
+      let completed = [];
+      let clickable = false;
+      let startTime;
+
+      function shuffle() {
+        //피셔-예이츠 셔플
+        for (let i = 0; colorCopy.length > 0; i += 1) {
+          const randomIndex = Math.floor(Math.random() * colorCopy.length);
+          shuffled = shuffled.concat(colorCopy.splice(randomIndex, 1));
+        }
+      }
+      function createCard(i) {
+        const card = document.createElement("div");
+        card.className = "card";
+        const cardInner = document.createElement("div");
+        cardInner.className = "card-inner";
+        const cardFront = document.createElement("div");
+        cardFront.className = "card-front";
+        const cardBack = document.createElement("div");
+        cardBack.className = "card-back";
+        cardBack.textContent = shuffled[i];
+        cardInner.appendChild(cardFront);
+        cardInner.appendChild(cardBack);
+        card.appendChild(cardInner);
+        return card;
+      }
+      function onClickCard() {
+        if (!clickable || completed.includes(this) || clicked[0] === this) {
+          return;
+        }
+        this.classList.toggle("flipped");
+        clicked.push(this);
+        if (clicked.length !== 2) {
+          return;
+        }
+        const firstBackColor =
+          clicked[0].querySelector(".card-back").textContent;
+        const secondBackColor =
+          clicked[1].querySelector(".card-back").textContent;
+        if (firstBackColor === secondBackColor) {
+          completed.push(clicked[0]);
+          completed.push(clicked[1]);
+          clicked = [];
+
+          // completed = completed.concat(clicked) 위 세줄을 이렇게 줄일수있다;
+          if (completed.length !== total) {
+            return;
+          }
+          let endTime = new Date();
+          setTimeout(() => {
+            $text.textContent = `축하합니다! ${
+              (endTime - startTime) / 1000
+            }초 걸렸습니다.`;
+          }, 500);
+
+          return;
+        }
+        clickable = false;
+        setTimeout(() => {
+          clicked[0].classList.remove("flipped");
+          clicked[1].classList.remove("flipped");
+          clicked = [];
+          clickable = true;
+        }, 1000);
+      }
+      function startGame() {
+        clickable = false;
+        shuffle();
+        for (let i = 0; i < total; i += 1) {
+          const card = createCard(i);
+          card.addEventListener("click", onClickCard);
+          $wrapper.appendChild(card);
+        }
+        document.querySelectorAll(".card").forEach((card, index) => {
+          //초반카드
+          setTimeout(() => {
+            card.classList.add("flipped");
+          }, 1000 + 100 * index);
+        });
+        setTimeout(() => {
+          //카드 뒤집기
+          document.querySelectorAll(".card").forEach((card) => {
+            card.classList.remove("flipped");
+          });
+          clickable = true;
+          startTime = new Date();
+        }, 5000);
+      }
+      startGame();
+      function resetGame() {
+        $wrapper.innerHTML = "<h1>Memory Game</h1>";
+        $text.innerHTML = "";
+        colorCopy = colors.concat(colors);
+        shuffled = [];
+        completed = [];
+        startGame();
+      }
+    </script>
+  </body>
+</html>

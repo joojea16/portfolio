@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background-color: lightyellow;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      #mobile {
+        position: relative;
+        width: 490px;
+        height: 840px;
+      }
+      #mobile::before {
+        content: "";
+        width: 460px;
+        height: 900px;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        background: url(./img2/phone1.png) no-repeat;
+        background-size: cover;
+      }
+      iframe {
+        position: absolute;
+        top: 110px;
+        left: 72px;
+        z-index: 3;
+        border: none;
+      }
+      iframe::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="mobile">
+      <iframe src="./seoul.html" width="365" height="620"></iframe>
+    </div>
+  </body>
+</html>
